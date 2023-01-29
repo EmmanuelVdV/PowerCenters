@@ -9,20 +9,21 @@ let cellSize = 1.8;
 let gridCols = w / cellSize;
 let gridRows = h / cellSize;
 
-let nMaxShapes = (gridCols * gridRows) / 400; // / 2000;
+let nMaxShapes = (gridCols * gridRows) / 1000; // / 2000;
 
 let drawBorders = false;
-let maxHatch = 10; //8;
+let maxHatch = 6; //8;
 
 let selectSingularity = false; // has the Singularity been identified ?
 let isSingularity = false; // is the current Shape the Singularity ?
 
-// let delta = 0.1; // delta margin for cell Shape init
-let centerCol = Math.round(gridCols / 2);
-let centerRow = Math.round(gridRows / 2);
-let nCircles = 3;
+// let centerCol = Math.round(gridCols / 2);
+// let centerRow = Math.round(gridRows / 2);
 
-let target;
+// let target;
+
+let powercenters = [];
+let nPowercenters = 2;
 
 function setup() {
   createCanvas(w, h);
@@ -30,10 +31,14 @@ function setup() {
   stroke(255);
   rectMode(CENTER);
 
-  target = createVector(w/2, h/2); // initial target at canvas' center
+  // target = createVector(w/2, h/2); // initial target at canvas' center
 
-  console.log(gridCols, gridRows);
-  console.log(centerCol, centerRow);
+  // console.log(gridCols, gridRows);
+  // console.log(centerCol, centerRow);
+
+  randomSeed(fxrand() * 10000);
+
+  initPowerCenters();
   initGrid();
 }
 
@@ -43,14 +48,14 @@ function draw() {
 
   if (attempts < maxAttempts) {
     shapes.forEach(s => {
-      let dir = Math.round(fxrand() * 3);
+      let dir = Math.round(random() * 3);
       s.grow(dir);
     });
     attempts++;
   } else {
     console.log("stop");
-    // console.log("target", target);
     shapes.forEach(s => s.hatch());
+    // powercenters.forEach(pc => {console.log(pc); pc.show();});
     noLoop();
   }
 }
@@ -67,45 +72,45 @@ function initGrid() {
     }
   }
 
-  // let ix = fxrand();
-  // let iy = fxrand();
 
-  let circle = 1;
+  for (let s = 1; s <= nMaxShapes; s++) {
+    let c = Math.round(random() * (gridCols - 1));
+    let r = Math.round(random() * (gridRows - 1));
 
+    // let c = Math.round(centerCol + cos(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridCols * circle / (2 * nCircles) - 1)); // ajouté fxrand() et "*circle"
+    // let r = Math.round(centerRow + sin(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridRows * circle / (2 * nCircles) - 1));
 
-  // for (let circle = 1; circle <= nCircles; circle++) {
-      for (let s = 1; s <= nMaxShapes /* / nCircles*/; s++) {
-        let c = Math.round(fxrand() * (gridCols - 1));
-        let r = Math.round(fxrand() * (gridRows - 1));
-
-        // let c = Math.round(centerCol + cos(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridCols * circle / (2 * nCircles) - 1)); // ajouté fxrand() et "*circle"
-        // let r = Math.round(centerRow + sin(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridRows * circle / (2 * nCircles) - 1));
-
-        console.log(c, r);
+    // console.log(c, r);
 
 
 
-        if (!selectSingularity && c > 10 && c < (gridCols - 10) && r > 10 && r < (gridRows - 10)) { // selection of Singularity
-          isSingularity = fxrand() > 0.98 ? true : false;
-          if (isSingularity) selectSingularity = true;
-        }
-
-        //if ((Math.abs((centerCol-c)/(centerRow-r)) < (1.0-delta)) || (Math.abs((centerCol-c)/(centerRow-r)) < (1.0 + delta))) {
-        // if (((c % 5) < delta) || ((r%5) < delta)) {
-        if (grid[c][r] == 0) {
-          let shape = new Shape(s + 1, c, r, isSingularity);
-          shapes.push(shape); // create shape if cell is free
-        }
-        // }
-
-        isSingularity = false;
-      }
+    if (!selectSingularity && c > 10 && c < (gridCols - 10) && r > 10 && r < (gridRows - 10)) { // selection of Singularity
+      isSingularity = random() > 0.98 ? true : false;
+      if (isSingularity) selectSingularity = true;
     }
-//}
+
+    if (grid[c][r] == 0) {
+      let shape = new Shape(s + 1, c, r, isSingularity);
+      shapes.push(shape); // create shape if cell is free
+    }
+
+    isSingularity = false;
+  }
+}
+
+function initPowerCenters() {
+  for (let i = 0; i < nPowercenters; i++) {
+    let x = Math.round(random() * w);
+    let y = Math.round(random() * h);
+    let r = random() * Math.max(w / 5, h / 5); // radius
+    let pc = new Powercenter(x, y, r);
+    powercenters.push(pc);
+  }
+}
 
 function keyTyped() {
   if (key === 'p' || key === 'P') {
-    saveCanvas('FindYourPlace-' + getTimeStamp(), 'png');
+    saveCanvas('PowerCenters-' + getTimeStamp(), 'png');
   } else if (key === 's' || key === 'S') {
 
     // SVG rendering and saving
@@ -120,7 +125,7 @@ function keyTyped() {
     let blob = new Blob([svg], { type: "image/svg+xml" });
 
     let dl = document.createElement("a");
-    dl.download = "FindYourPlace-" + getTimeStamp() + ".svg";
+    dl.download = "PowerCenters-" + getTimeStamp() + ".svg";
     dl.href = URL.createObjectURL(blob);
     dl.dataset.downloadurl = ["image/svg+xml", dl.download, dl.href].join(':');
     dl.style.display = "none";
