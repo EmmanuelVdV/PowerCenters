@@ -10,8 +10,8 @@ class Shape {
         this.shWidth = this.shHeight = 1;
         this.canGrow = true;
 
-        // this.size = random(8, 12); // final size between 60% and 95% ==>>> A ajuster entre 9.9 et ??
-        this.size = 9.9; //9.9
+        this.size = random(8, 11); // final size between 60% and 95% ==>>> A ajuster entre 9.9 et ??
+        // this.size = 9.9; //9.9
         // this.hatchDirection = Math.round(random(1)); // 0: horizontal, 1: vertical ==> not needed anymore
 
         this.additionalHatch = 0;
@@ -37,8 +37,8 @@ class Shape {
 
     updatePowerCenter() { // update attributes related to Power Center (if shape belongs to any)
 
-        // let e = Math.floor(easings.length * random());
-        this.easing = regular; // regular hatching
+        let e = Math.floor(easings.length * random());
+        this.easing = easings[e]; // regular hatching
         // console.log(e, easings[e](45));
 
         this.angle = random(Math.PI);

@@ -9,10 +9,10 @@ let cellSize = 1.8;
 let gridCols = w / cellSize;
 let gridRows = h / cellSize;
 
-let nMaxShapes = (gridCols * gridRows) / 1000; // / 2000;
+let nMaxShapes = (gridCols * gridRows) / 200; // / 2000;
 
 let drawBorders = false;
-let maxHatch = 6; //8;
+let maxHatch = 10; //8;
 
 let selectSingularity = false; // has the Singularity been identified ?
 let isSingularity = false; // is the current Shape the Singularity ?
@@ -74,8 +74,8 @@ function initGrid() {
 
 
   for (let s = 1; s <= nMaxShapes; s++) {
-    let c = Math.round(random() * (gridCols - 1));
-    let r = Math.round(random() * (gridRows - 1));
+    let c = Math.round((1-random()) * (gridCols - 1));
+    let r = Math.round((1-random()) * (gridRows - 1));
 
     // let c = Math.round(centerCol + cos(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridCols * circle / (2 * nCircles) - 1)); // ajouté fxrand() et "*circle"
     // let r = Math.round(centerRow + sin(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridRows * circle / (2 * nCircles) - 1));
@@ -99,10 +99,11 @@ function initGrid() {
 }
 
 function initPowerCenters() {
+  let margin = Math.max(w, h) / 5;
   for (let i = 0; i < nPowercenters; i++) {
-    let x = Math.round(random() * w);
-    let y = Math.round(random() * h);
-    let r = random() * Math.max(w / 5, h / 5); // radius
+    let x = Math.round(random(margin, w-margin));
+    let y = Math.round(random(margin, h-margin));
+    let r = random() * Math.min(w / 5, h / 5); // radius
     let pc = new Powercenter(x, y, r);
     powercenters.push(pc);
   }
