@@ -7,7 +7,7 @@ class Powercenter {
 
         // let e = Math.floor(easings.length * random());
         // this.easing = easings[e];
-        this.easing = easeInCirc;
+        this.easing = cross; // easeInCirc;
 
         this.angle = random(Math.PI);
     }

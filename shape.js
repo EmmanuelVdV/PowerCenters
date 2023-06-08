@@ -10,7 +10,7 @@ class Shape {
         this.shWidth = this.shHeight = 1;
         this.canGrow = true;
 
-        this.size = random(8, 11); // final size between 60% and 95% ==>>> A ajuster entre 9.9 et ??
+        this.size = 11; //random(8, 11); // final size between 60% and 95% ==>>> A ajuster entre 9.9 et ??
         // this.size = 9.9; //9.9
         // this.hatchDirection = Math.round(random(1)); // 0: horizontal, 1: vertical ==> not needed anymore
 
@@ -37,19 +37,19 @@ class Shape {
 
     updatePowerCenter() { // update attributes related to Power Center (if shape belongs to any)
 
-        let e = Math.floor(easings.length * random());
-        this.easing = easings[e]; // regular hatching
+        let e = Math.floor((easings.length-1) * random()); // select hatching except "cross"
+        this.easing = easings[e]; 
         // console.log(e, easings[e](45));
 
         this.angle = random(Math.PI);
         if (this.angle < Math.PI / 2) { this.angle = 0; } else { this.angle = Math.PI / 2; }
 
         for (let i = 0; i < powercenters.length; i++) {
-            if (Math.abs(this.cw - powercenters[i].x) < powercenters[i].radius && Math.abs(this.ch - powercenters[i].y) < powercenters[i].radius) { // if shape belongs to a powercenter
+            if (Math.sqrt(Math.pow(this.cw - powercenters[i].x, 2) + Math.pow(this.ch - powercenters[i].y, 2))< powercenters[i].radius) { // if shape belongs to a powercenter
                 this.easing = powercenters[i].easing;
                 this.angle = powercenters[i].angle;
-                this.size = 11.5;
-                this.additionalHatch = 6;
+                this.size = 11.5; // override of the size
+                this.additionalHatch = 0; //6; // additional hatches for PowerCenter
             }
         }
 
@@ -86,56 +86,6 @@ class Shape {
     }
 
     getTargetDirection() {
-        // this.createBBox(); //create Bounding box
-
-        // // let dir = createVector(this.target.x - this.cw, this.target.y - this.ch);
-        // // dir.normalize();
-
-        // let shCenter = createVector(this.cw, this.ch);
-        // let axe = new Ray(shCenter, this.dir);
-
-        // let record1 = 500000000;
-        // let record2 = 500000000;
-        // let closest1 = null;
-        // let closest2 = null;
-
-        // // console.log("walls", this.walls);
-        // // console.log("shape center", shCenter);
-        // // console.log("axe", axe);
-
-        // this.walls.forEach(w => {
-        //     let pt = axe.cast(w, 1.0);
-        //     if (pt != null) {
-        //         let d = shCenter.dist(pt);
-        //         if (d < record1) {
-        //             record1 = d;
-        //             closest1 = pt;
-        //         }
-        //     }
-        // });
-
-        // this.walls.forEach(w => {
-        //     let pt = axe.cast(w, -1.0);
-        //     if (pt != null) {
-        //         let d = shCenter.dist(pt);
-        //         if (d < record2) {
-        //             record2 = d;
-        //             closest2 = pt;
-        //         }
-        //     }
-        // });
-
-        // // Bounding box can include target and axe does not find intersections 
-        // if (closest1 != null && closest2 != null) {
-        //     if (closest1.x <= closest2.x) {
-        //         this.AxisPt1 = createVector(closest1.x, closest1.y);
-        //         this.AxisPt2 = createVector(closest2.x, closest2.y);
-        //     } else {
-        //         this.AxisPt2 = createVector(closest1.x, closest1.y);
-        //         this.AxisPt1 = createVector(closest2.x, closest2.y);
-        //     }
-        // }
-
         // Simplification : recherche des points de l'axe de direction avec un bounding circle
         this.maxWH = Math.sqrt(Math.pow(this.w / 2, 2) + Math.pow(this.h / 2, 2));
         this.AxisPt1 = createVector(this.cw + Math.cos(this.angle) * this.maxWH, this.ch + Math.sin(this.angle) * this.maxWH);
@@ -188,6 +138,14 @@ class Shape {
         }
     }
 
+    generateHatch() {
+        this.hatch();
+        if (this.easing == cross) { // handle cross hatching
+            this.angle += Math.PI/2;
+            this.hatch();
+        }
+    }
+
     hatch() {
         // if (!this.isSingularity) {
         this.getTargetDirection();
@@ -199,20 +157,6 @@ class Shape {
             let distAxis = this.AxisPt1.dist(this.AxisPt2);
             let distAxisX = Math.abs(this.AxisPt2.x - this.AxisPt1.x);
             let distAxisY = Math.abs(this.AxisPt2.y - this.AxisPt1.y);
-
-            // stroke('#00FF00');
-            // fill('#00FF00');
-            // circle(this.AxisPt1.x, this.AxisPt1.y, 10);
-            // stroke('#FF0000');
-            // fill('#FF0000');
-            // circle(this.AxisPt2.x, this.AxisPt2.y, 5);
-            // noFill();
-            // stroke('#0000FF');
-            // line(this.AxisPt1.x, this.AxisPt1.y, this.AxisPt2.x, this.AxisPt2.y);
-            // stroke('#FFFF00');
-            // fill('#FFFF00');
-            // circle(this.cw, this.ch, 5);
-            // noFill();
 
             stroke(255);
 
@@ -245,6 +189,7 @@ class Shape {
                     this.rays.push([RayPt1, RayPt2]);
                 }
             }
+
             if (this.isSingularity) { stroke('#8B0000'); } else { stroke(255); }
 
             this.rays.forEach(r => {
@@ -253,22 +198,6 @@ class Shape {
 
         }
 
-        // } else {
-        //     stroke('#8B0000');
-        //     if (this.hatchDirection == 0) {
-        //         let hatch = round(map(this.h, cellSize, 10 * cellSize, 1, maxHatch));
-        //         for (let i = 1; i <= hatch; i++) {
-        //             let j = map(i, 1, hatch, 0, 1);
-        //             line(this.cw - this.w / 2, this.ch - this.h / 2 + i * this.h / hatch * this.easing(j), this.cw + this.w / 2, this.ch - this.h / 2 + i * this.h / hatch * this.easing(j));
-        //         }
-        //     } else {
-        //         let hatch = round(map(this.w, cellSize, 10 * cellSize, 1, maxHatch));
-        //         for (let i = 1; i <= hatch; i++) {
-        //             let j = map(i, 1, hatch, 0, 1);
-        //             line(this.cw - this.w / 2 + i * this.w / hatch * this.easing(j), this.ch - this.h / 2, this.cw - this.w / 2 + i * this.w / hatch * this.easing(j), this.ch + this.h / 2);
-        //         }
-        //     }
-        // }
     }
 
     renderSVG(d, g) {

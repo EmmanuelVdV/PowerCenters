@@ -2,6 +2,10 @@ const regular = function(x) {
     return x;
 }
 
+const cross = function(x) {
+    return x;
+}
+
 const easeInQuint = function (x) {
     return Math.pow(x, 5);
 }
@@ -99,5 +103,5 @@ const easings = [easeInQuint, easeOutQuint, easeInOutQuint,
     easeInCubic, easeOutCubic, easeInOutCubic,
     easeInQuad, easeOutQuad, easeInOutQuad,
     easeInCirc, easeOutCirc, easeInOutCirc,
-    regular
+    regular, cross
     /*easeInElastic, easeOutElastic, easeInOutElastic*/];

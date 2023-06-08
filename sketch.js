@@ -23,7 +23,8 @@ let isSingularity = false; // is the current Shape the Singularity ?
 // let target;
 
 let powercenters = [];
-let nPowercenters = 2;
+let nPowercenters = 3; //2
+let maxRadiusPowerCenter;
 
 function setup() {
   createCanvas(w, h);
@@ -37,6 +38,8 @@ function setup() {
   // console.log(centerCol, centerRow);
 
   randomSeed(fxrand() * 10000);
+
+  maxRadiusPowerCenter = Math.min(w / 5, h / 5);
 
   initPowerCenters();
   initGrid();
@@ -54,7 +57,7 @@ function draw() {
     attempts++;
   } else {
     console.log("stop");
-    shapes.forEach(s => s.hatch());
+    shapes.forEach(s => s.generateHatch());
     // powercenters.forEach(pc => {console.log(pc); pc.show();});
     noLoop();
   }
@@ -101,9 +104,9 @@ function initGrid() {
 function initPowerCenters() {
   let margin = Math.max(w, h) / 5;
   for (let i = 0; i < nPowercenters; i++) {
-    let x = Math.round(random(margin, w-margin));
+    let x = Math.round(random(margin, w-margin)); 
     let y = Math.round(random(margin, h-margin));
-    let r = random() * Math.min(w / 5, h / 5); // radius
+    let r = random(0.5, 1) * maxRadiusPowerCenter; // radius
     let pc = new Powercenter(x, y, r);
     powercenters.push(pc);
   }
