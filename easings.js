@@ -98,10 +98,10 @@ const easeInOutElastic = function (x) {
                 : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
 }
 
-const easings = [easeInQuint, easeOutQuint, easeInOutQuint,
-    easeInSine, easeOutSine, easeInOutSine,
-    easeInCubic, easeOutCubic, easeInOutCubic,
-    easeInQuad, easeOutQuad, easeInOutQuad,
-    easeInCirc, easeOutCirc, easeInOutCirc,
+const easings = [easeInQuint, easeOutQuint, /*easeInOutQuint,*/
+    easeInSine, easeOutSine, /*easeInOutSine,*/
+    easeInCubic, easeOutCubic, /*easeInOutCubic,*/
+    easeInQuad, easeOutQuad, /*easeInOutQuad,*/
+    easeInCirc, easeOutCirc, /*easeInOutCirc,*/
     regular, cross
     /*easeInElastic, easeOutElastic, easeInOutElastic*/];

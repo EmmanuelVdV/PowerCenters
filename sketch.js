@@ -5,14 +5,14 @@ let maxAttempts = 200; // 500 // 1500
 
 let shapes = [];
 let grid = [];
-let cellSize = 1.8;
-let gridCols = w / cellSize;
-let gridRows = h / cellSize;
+let maxCellSize = 1.5; // 1.8
+let gridCols = w / maxCellSize;
+let gridRows = h / maxCellSize;
 
 let nMaxShapes = (gridCols * gridRows) / 200; // / 2000;
 
 let drawBorders = false;
-let maxHatch = 10; //8;
+let maxHatch = 12; //8;
 
 let selectSingularity = false; // has the Singularity been identified ?
 let isSingularity = false; // is the current Shape the Singularity ?
@@ -20,14 +20,17 @@ let isSingularity = false; // is the current Shape the Singularity ?
 // let centerCol = Math.round(gridCols / 2);
 // let centerRow = Math.round(gridRows / 2);
 
-// let target;
+let centerCanvas;
+let distCenterCanvas;
 
 let powercenters = [];
-let nPowercenters = 3; //2
-let maxRadiusPowerCenter;
+let maxDepthPowercenters = 6; //2
+let maxSubDivision = 4;
 
 function setup() {
   createCanvas(w, h);
+  centerCanvas = createVector(w/2, h/2);
+  distCenterCanvas = centerCanvas.dist(createVector(0,0));
   noFill();
   stroke(255);
   rectMode(CENTER);
@@ -39,7 +42,7 @@ function setup() {
 
   randomSeed(fxrand() * 10000);
 
-  maxRadiusPowerCenter = Math.min(w / 5, h / 5);
+  // maxRadiusPowerCenter = Math.min(w / 5, h / 5);
 
   initPowerCenters();
   initGrid();
@@ -48,6 +51,7 @@ function setup() {
 function draw() {
   background(0);
   shapes.forEach(s => s.render());
+  powercenters.forEach(pc => pc.show());
 
   if (attempts < maxAttempts) {
     shapes.forEach(s => {
@@ -58,7 +62,6 @@ function draw() {
   } else {
     console.log("stop");
     shapes.forEach(s => s.generateHatch());
-    // powercenters.forEach(pc => {console.log(pc); pc.show();});
     noLoop();
   }
 }
@@ -77,8 +80,8 @@ function initGrid() {
 
 
   for (let s = 1; s <= nMaxShapes; s++) {
-    let c = Math.round((1-random()) * (gridCols - 1));
-    let r = Math.round((1-random()) * (gridRows - 1));
+    let c = Math.round((random()) * (gridCols - 1));
+    let r = Math.round((random()) * (gridRows - 1));
 
     // let c = Math.round(centerCol + cos(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridCols * circle / (2 * nCircles) - 1)); // ajouté fxrand() et "*circle"
     // let r = Math.round(centerRow + sin(Math.PI * 2 * s / (fxrand() * nMaxShapes / (nCircles * circle))) * (gridRows * circle / (2 * nCircles) - 1));
@@ -102,14 +105,19 @@ function initGrid() {
 }
 
 function initPowerCenters() {
-  let margin = Math.max(w, h) / 5;
-  for (let i = 0; i < nPowercenters; i++) {
-    let x = Math.round(random(margin, w-margin)); 
-    let y = Math.round(random(margin, h-margin));
-    let r = random(0.5, 1) * maxRadiusPowerCenter; // radius
-    let pc = new Powercenter(x, y, r);
-    powercenters.push(pc);
-  }
+  // let margin = Math.max(w, h) / 5;
+  // for (let i = 0; i < nPowercenters; i++) {
+  //   let x = Math.round(random(margin, w-margin)); 
+  //   let y = Math.round(random(margin, h-margin));
+  //   let r = random(0.5, 1) * maxRadiusPowerCenter; // radius
+  //   let pc = new Powercenter(x, y, r);
+  //   powercenters.push(pc);
+  // }
+  let s = Math.floor(random() * maxSubDivision + 1);
+  let o = Math.round(random());
+  let pc = new Powercenter(0, 0, w, h, s, 0); // first PowerCenter at level 0 (whole canvas)
+
+  // console.log(powercenters);
 }
 
 function keyTyped() {

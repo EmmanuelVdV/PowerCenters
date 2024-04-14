@@ -10,10 +10,11 @@ class Shape {
         this.shWidth = this.shHeight = 1;
         this.canGrow = true;
 
-        this.size = 11; //random(8, 11); // final size between 60% and 95% ==>>> A ajuster entre 9.9 et ??
-        // this.size = 9.9; //9.9
+        this.size = random(8, 11); // final size between 60% and 95% ==>>> A ajuster entre 9.9 et ??
+        // this.size = 9.9;
         // this.hatchDirection = Math.round(random(1)); // 0: horizontal, 1: vertical ==> not needed anymore
 
+        this.maxH = maxHatch; // initialization
         this.additionalHatch = 0;
 
         this.updateWidthHeightCenter();
@@ -28,28 +29,36 @@ class Shape {
     }
 
     updateWidthHeightCenter() {
-        this.w = this.shWidth * cellSize * this.size / 10; // drawing size (x% of actual size)
-        this.h = this.shHeight * cellSize * this.size / 10;
+        this.w = this.shWidth * maxCellSize * this.size / 10; // drawing size (x% of actual size)
+        this.h = this.shHeight * maxCellSize * this.size / 10;
 
-        this.cw = (this.upperCellCol + this.shWidth / 2) * cellSize; // center of shape
-        this.ch = (this.upperCellRow + this.shHeight / 2) * cellSize;
+        this.cw = (this.upperCellCol + this.shWidth / 2) * maxCellSize; // center of shape
+        this.ch = (this.upperCellRow + this.shHeight / 2) * maxCellSize;
     }
 
     updatePowerCenter() { // update attributes related to Power Center (if shape belongs to any)
 
-        let e = Math.floor((easings.length-1) * random()); // select hatching except "cross"
-        this.easing = easings[e]; 
-        // console.log(e, easings[e](45));
+        // let e = Math.floor((easings.length-1) * random()); // select hatching except "cross"
+        // this.easing = easings[e]; 
+        // // console.log(e, easings[e](45));
 
-        this.angle = random(Math.PI);
-        if (this.angle < Math.PI / 2) { this.angle = 0; } else { this.angle = Math.PI / 2; }
+        // this.angle = random(Math.PI);
+        // if (this.angle < Math.PI / 2) { this.angle = 0; } else { this.angle = Math.PI / 2; }
 
         for (let i = 0; i < powercenters.length; i++) {
-            if (Math.sqrt(Math.pow(this.cw - powercenters[i].x, 2) + Math.pow(this.ch - powercenters[i].y, 2))< powercenters[i].radius) { // if shape belongs to a powercenter
-                this.easing = powercenters[i].easing;
-                this.angle = powercenters[i].angle;
-                this.size = 11.5; // override of the size
+            let pc = powercenters[i];
+            if (this.cw > pc.x &&
+                this.cw < (pc.x + pc.width) &&
+                this.ch > pc.y &&
+                this.ch < (pc.y + pc.height)) { // if shape belongs to a powercenter
+                this.easing = pc.easing;
+                this.angle = pc.angle;
+                // this.size = 11 * pc.cellSize; // override of the size
+                // console.log(this.size);
                 this.additionalHatch = 0; //6; // additional hatches for PowerCenter
+                this.maxH = pc.maxH;
+
+                //console.log(this.size, this.maxH);
             }
         }
 
@@ -141,7 +150,7 @@ class Shape {
     generateHatch() {
         this.hatch();
         if (this.easing == cross) { // handle cross hatching
-            this.angle += Math.PI/2;
+            this.angle += Math.PI / 2;
             this.hatch();
         }
     }
@@ -162,8 +171,8 @@ class Shape {
 
             this.dir.rotate(Math.PI / 2); // rotate 90 degrees
 
-            let hatch = Math.floor(distAxis / (10 * cellSize)) * (maxHatch + this.additionalHatch); //round(map(distAxis, cellSize, /* max(this.w, this.h) */ 10 * cellSize, 1, maxHatch));
-            // console.log("hatch", hatch);
+            let hatch = Math.floor(distAxis / (8 * maxCellSize)) * Math.round(this.maxH);
+            // console.log(hatch, this.maxH, distAxis);
 
             for (let i = 1; i <= hatch; i++) {
                 let j = map(i, 1, hatch, 0, 1);
